@@ -8,6 +8,4 @@ type PlayingState struct {
 
 type GameLog struct {
 	CurrentTime time.Time
-	Message     string
-	Username    string
 }

@@ -18,6 +18,12 @@ func main() {
 	}
 	defer conn.Close()
 
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Printf("Could not open connection channel: %v", err)
+	}
+	defer ch.Close()
+
 	fmt.Println("AMQP connetion established")
 	fmt.Println("Starting Peril server...")
 
