@@ -1,3 +1,4 @@
+// Package gamelogic is responsible for inner logic of the game
 package gamelogic
 
 type Player struct {

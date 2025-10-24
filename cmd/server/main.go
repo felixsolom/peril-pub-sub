@@ -6,6 +6,9 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
+	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
+	"github.com/bootdotdev/learn-pub-sub-starter/internal/routing"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -14,18 +17,26 @@ func main() {
 
 	conn, err := amqp.Dial(connString)
 	if err != nil {
-		log.Printf("Couldn't make a new connection: %v", err)
+		log.Fatalf("Couldn't make a new connection: %v", err)
 	}
 	defer conn.Close()
 
 	ch, err := conn.Channel()
 	if err != nil {
-		log.Printf("Could not open connection channel: %v", err)
+		log.Fatalf("Could not open connection channel: %v", err)
 	}
 	defer ch.Close()
 
-	fmt.Println("AMQP connetion established")
+	err = pubsub.PublishJSON(ch, string(routing.ExchangePerilDirect), string(routing.PauseKey), routing.PlayingState{
+		IsPaused: true,
+	})
+	if err != nil {
+		log.Fatalf("Could not publish json: %v", err)
+	}
+
+	fmt.Println("AMQP connection established")
 	fmt.Println("Starting Peril server...")
+	gamelogic.PrintServerHelp()
 
 	// wait for ctrl+c
 	signalChan := make(chan os.Signal, 1)
