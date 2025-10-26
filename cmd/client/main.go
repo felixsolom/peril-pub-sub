@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -37,6 +38,37 @@ func main() {
 
 	log.Printf("Biding queue: %v, on channel: %v", queue, ch)
 
+	gs := gamelogic.NewGameState(userName)
+
+REPlloop:
+	for {
+		words := gamelogic.GetInput()
+		switch words[0] {
+		case "spawn":
+			err := gs.CommandSpawn(words)
+			if err != nil {
+				log.Fatalf("Could not extract commands from player input: %v", err)
+				break REPlloop
+			}
+		case "move":
+			_, err := gs.CommandMove(words)
+			if err != nil {
+				log.Fatalf(("Could not execute move command: %v"), err)
+				break REPlloop
+			}
+		case "status":
+			gs.CommandStatus()
+		case "help":
+			gamelogic.PrintClientHelp()
+		case "spam":
+			log.Println("Spamming not allowed yet")
+		case "quit":
+			gamelogic.PrintQuit()
+			break REPlloop
+		default:
+			fmt.Println(errors.New("command doesnt exist. use 'help' to see this list of existing commands"))
+		}
+	}
 	// wait for ctrl+c
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
