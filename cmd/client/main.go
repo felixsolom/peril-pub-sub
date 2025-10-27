@@ -21,7 +21,6 @@ func main() {
 		log.Fatalf("Couldn't make a new connection: %v", err)
 	}
 	defer conn.Close()
-
 	fmt.Println("Starting Peril server...")
 
 	userName, err := gamelogic.ClientWelcome()
@@ -40,6 +39,10 @@ func main() {
 
 	gs := gamelogic.NewGameState(userName)
 
+	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilDirect, queueName, routing.PauseKey, "transient", handlerPause(gs))
+	if err != nil {
+		log.Fatalf("could not subscribe to queue: %v: ", err)
+	}
 REPlloop:
 	for {
 		words := gamelogic.GetInput()
