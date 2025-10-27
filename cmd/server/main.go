@@ -52,7 +52,7 @@ inputLoop:
 				log.Fatalf("Could not publish json: %v", err)
 			}
 		case "quit":
-			fmt.Println("Esiting the game")
+			fmt.Println("Exiting the game")
 			break inputLoop
 		default:
 			fmt.Println("Unknown command")

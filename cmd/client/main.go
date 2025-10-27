@@ -29,22 +29,20 @@ func main() {
 	}
 
 	queueName := routing.PauseKey + "." + userName
-	ch, queue, err := pubsub.DeclareAndBind(conn, routing.ExchangePerilDirect, queueName, routing.PauseKey, "transient")
-	if err != nil {
-		log.Fatalf("Could not declare and bind queue to exchance: %v", err)
-	}
-	defer ch.Close()
-
-	log.Printf("Biding queue: %v, on channel: %v", queue, ch)
-
 	gs := gamelogic.NewGameState(userName)
 
-	err = pubsub.SubscribeJSON(conn, routing.ExchangePerilDirect, queueName, routing.PauseKey, "transient", handlerPause(gs))
+	err = pubsub.SubscribeJSON(conn,
+		routing.ExchangePerilDirect,
+		queueName,
+		routing.PauseKey,
+		"transient",
+		HandlerPause(gs))
 	if err != nil {
 		log.Fatalf("could not subscribe to queue: %v: ", err)
 	}
 REPlloop:
 	for {
+		fmt.Print("> ")
 		words := gamelogic.GetInput()
 		switch words[0] {
 		case "spawn":

@@ -7,11 +7,9 @@ import (
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/routing"
 )
 
-func handlerPause(gs *gamelogic.GameState) func(routing.PlayingState) {
-	return func(_ routing.PlayingState) {
+func HandlerPause(gs *gamelogic.GameState) func(routing.PlayingState) {
+	return func(ps routing.PlayingState) {
 		defer fmt.Print("> ")
-		gs.HandlePause(routing.PlayingState{
-			IsPaused: true,
-		})
+		gs.HandlePause(ps)
 	}
 }
