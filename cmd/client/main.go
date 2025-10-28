@@ -23,6 +23,12 @@ func main() {
 	defer conn.Close()
 	fmt.Println("Starting Peril server...")
 
+	PublishCh, err := conn.Channel()
+	if err != nil {
+		log.Fatalf("Could not create publish channel: %v", err)
+	}
+	defer PublishCh.Close()
+
 	userName, err := gamelogic.ClientWelcome()
 	if err != nil {
 		log.Fatalf("Could not produce client welcome sequence: %v", err)
@@ -40,6 +46,21 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not subscribe to queue: %v: ", err)
 	}
+	queueNameMove := "army_moves" + "." + userName
+	routingKey := fmt.Sprintf("army_moves.%s", userName)
+
+	err = pubsub.SubscribeJSON(
+		conn,
+		routing.ExchangePerilTopic,
+		queueNameMove,
+		"army_moves.*",
+		"transient",
+		HandlerMove(gs),
+	)
+	if err != nil {
+		log.Fatalf("could not subscribe to queue: %v", err)
+	}
+
 REPlloop:
 	for {
 		fmt.Print("> ")
@@ -52,11 +73,23 @@ REPlloop:
 				break REPlloop
 			}
 		case "move":
-			_, err := gs.CommandMove(words)
+			move, err := gs.CommandMove(words)
 			if err != nil {
 				log.Fatalf(("Could not execute move command: %v"), err)
 				break REPlloop
 			}
+			err = pubsub.PublishJSON(
+				PublishCh,
+				routing.ExchangePerilTopic,
+				routingKey,
+				move,
+			)
+			if err != nil {
+				log.Fatalf("could not publish the move: %v", err)
+				break REPlloop
+			}
+			fmt.Println("Move was published successfully")
+
 		case "status":
 			gs.CommandStatus()
 		case "help":
