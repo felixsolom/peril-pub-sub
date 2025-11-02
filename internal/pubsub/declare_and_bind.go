@@ -1,4 +1,4 @@
-// Package pubsub is declaring RabbitMQ functionality
+// Package pubsub
 package pubsub
 
 import (
@@ -28,14 +28,18 @@ func DeclareAndBind(
 
 	var queue amqp.Queue
 
+	amqpTable := amqp.Table{
+		"x-dead-letter-exchange": "peril_dlx",
+	}
+
 	if queueType == durable {
-		queue, err = ch.QueueDeclare(queueName, true, false, false, false, nil)
+		queue, err = ch.QueueDeclare(queueName, true, false, false, false, amqpTable)
 		if err != nil {
 			return nil, amqp.Queue{}, fmt.Errorf("could not declare queue: %w", err)
 		}
 	}
 	if queueType == transient {
-		queue, err = ch.QueueDeclare(queueName, false, true, true, false, nil)
+		queue, err = ch.QueueDeclare(queueName, false, true, true, false, amqpTable)
 		if err != nil {
 			return nil, amqp.Queue{}, fmt.Errorf("could not declare queue: %w", err)
 		}
