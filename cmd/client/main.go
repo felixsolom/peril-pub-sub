@@ -55,7 +55,7 @@ func main() {
 		queueNameMove,
 		"army_moves.*",
 		"transient",
-		HandlerMove(gs),
+		HandlerMove(gs, PublishCh),
 	)
 	if err != nil {
 		log.Fatalf("could not subscribe to queue: %v", err)
