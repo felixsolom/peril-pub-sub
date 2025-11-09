@@ -46,6 +46,22 @@ func main() {
 	if err != nil {
 		log.Fatalf("could not subscribe to queue: %v: ", err)
 	}
+
+	queueNameWar := "war"
+	routingKeyWar := fmt.Sprintf("%s.%s", routing.WarRecognitionsPrefix, userName)
+
+	err = pubsub.SubscribeJSON(
+		conn,
+		string(routing.ExchangePerilTopic),
+		queueNameWar,
+		routingKeyWar,
+		"durable",
+		HandlerWar(gs),
+	)
+	if err != nil {
+		log.Fatalf("could not subscribe to queue: %v", err)
+	}
+
 	queueNameMove := "army_moves" + "." + userName
 	routingKey := fmt.Sprintf("army_moves.%s", userName)
 

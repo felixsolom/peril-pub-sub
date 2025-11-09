@@ -18,17 +18,23 @@ func HandlerMove(gs *gamelogic.GameState, ch *amqp091.Channel) func(gamelogic.Ar
 			return pubsub.Ack
 		}
 		if moveOutcome == gamelogic.MoveOutcomeMakeWar {
-			userName := gs.GetUsername()
-			routingKey := fmt.Sprintf("%s.%s", routing.WarRecognitionsPrefix, userName)
+			warRecognition := gamelogic.RecognitionOfWar{
+				Attacker: move.Player,
+				Defender: gs.GetPlayerSnap(),
+			}
+
+			routingKey := fmt.Sprintf("%s.%s", routing.WarRecognitionsPrefix, gs.GetUsername())
 			err := pubsub.PublishJSON(ch,
 				routing.ExchangePerilTopic,
 				routingKey,
-				moveOutcome)
+				warRecognition)
 			if err != nil {
-				fmt.Printf("Failed to publish war recognition", err)
+				fmt.Printf("Failed to publish war recognition: %v", err)
+				return pubsub.NackRequeue
 			}
-			return pubsub.NackRequeue
+			return pubsub.Ack
 		}
+		fmt.Println("error: uknown move outcome")
 		return pubsub.NackDiscard
 	}
 }
