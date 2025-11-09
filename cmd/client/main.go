@@ -56,7 +56,7 @@ func main() {
 		queueNameWar,
 		routingKeyWar,
 		"durable",
-		HandlerWar(gs),
+		HandlerWar(gs, PublishCh),
 	)
 	if err != nil {
 		log.Fatalf("could not subscribe to queue: %v", err)
